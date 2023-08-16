@@ -5,6 +5,7 @@ import Header from '../Header';
 import Message from '../Message';
 import ReposResults from '../ReposResults';
 import SearchBar from '../SearchBar';
+import LoadMore from '../LoadMore';
 
 import './style.scss';
 
@@ -33,9 +34,14 @@ const [results, setResults] = useState([]);
 const [search, setSearch] = useState('');
 const [query, setQuery ] = useState('');
 const [error, setError] = useState('');
+const [page, setPage] = useState(1);
+
+
 const reset = () => {
   setError('');
   setMessage('');
+  setResults([]);
+  setPage(1);
 }
 
 
@@ -44,10 +50,15 @@ const reset = () => {
 
 
 const loadData = async () => {
-  reset();
+  
   try {
-    const response = await axios.get(`https://api.github.com/search/repositories?q=${query}`);
-    setResults(response.data.items);
+    const response = await axios.get(`https://api.github.com/search/repositories?q=${query}&sort=stars&order=desc&page=${page}&per_page=9`);
+    // on deverse les résultats qui sont deja dans le state en 1er
+    // on deverse les nouveaux résultats à la suite des premiers
+
+
+    const newResults = [...results, ...response.data.items]
+    setResults(newResults);
     setMessage(`La recherche a donné ${response.data.total_count} résultat(s)`);
     
   } catch (err) {
@@ -60,13 +71,17 @@ useEffect(() => {
   if(query) {
     loadData();
   }
-},[query]);
+},[query, page]);
 
 
  const changeQuery = () => {
+  // ici on soumet le formulaire , c'est le bon endroit pour tout reset
+  reset();
   setQuery(search)
  }
-
+ const handleLoadMore = () => {
+setPage(page + 1)
+ }
 
   return (
     <div className="app">
@@ -79,6 +94,9 @@ useEffect(() => {
           <Message content={message}/>
           {error && <div>Une erreur est survenue : {error}</div>  }
           <ReposResults results={filteredResults(results)} />
+          {results.length > 0  && <LoadMore onClickButton={handleLoadMore}/>
+}
+          
     </div>
   )
 
