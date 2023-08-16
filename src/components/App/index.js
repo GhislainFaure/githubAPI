@@ -29,15 +29,22 @@ function filteredResults(items) {
 // == Composant
 function App () {
 
-const [message, setMessage ] = useState("pas encore de résultat");
-const [results, setResults] = useState(resultsData.items);
+const [message, setMessage ] = useState("");
+const [results, setResults] = useState([]);
 const [search, setSearch] = useState('');
+const [error, setError] = useState('');
 
 const loadData = async () => {
-  console.log('je veux appeler mon API');
-  const response = await axios.get(`https://api.github.com/search/repositories?q=${search}`);
-  setResults(response.data.items);
-  setMessage(`La recherche a donné ${response.data.total_count} résultats`);
+  try {
+    const response = await axios.get(`https://api.github.com/search/repositories?q=${search}`);
+    setResults(response.data.items);
+    setMessage(`La recherche a donné ${response.data.total_count} résultat(s)`);
+    
+  } catch (err) {
+    setError(err.message);
+    setResults([]);
+  }
+ 
 
 
 }
@@ -51,6 +58,7 @@ const loadData = async () => {
            onSubmitForm={loadData}
           />
           <Message content={message}/>
+          {error && <div>Une erreur est survenue : {error}</div>  }
           <ReposResults results={filteredResults(results)} />
     </div>
   )
