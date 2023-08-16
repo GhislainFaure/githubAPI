@@ -1,5 +1,6 @@
 // == Import
 import { useState } from 'react';
+import axios from 'axios';
 import Header from '../Header';
 import Message from '../Message';
 import ReposResults from '../ReposResults';
@@ -32,11 +33,13 @@ const [message, setMessage ] = useState("pas encore de résultat");
 const [results, setResults] = useState(resultsData.items);
 const [search, setSearch] = useState('');
 
-const loadData = () => {
+const loadData = async () => {
   console.log('je veux appeler mon API');
+  const response = await axios.get(`https://api.github.com/search/repositories?q=${search}`);
+  setResults(response.data.items);
+
+
 }
-
-
 
   return (
     <div className="app">
@@ -44,6 +47,7 @@ const loadData = () => {
           <SearchBar  
            inputValue={search}
            onChangeInputValue={setSearch}
+           onSubmitForm={loadData}
           />
           <Message content={message}/>
           <ReposResults results={filteredResults(results)} />
