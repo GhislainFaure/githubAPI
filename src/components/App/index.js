@@ -37,6 +37,7 @@ const loadData = async () => {
   console.log('je veux appeler mon API');
   const response = await axios.get(`https://api.github.com/search/repositories?q=${search}`);
   setResults(response.data.items);
+  setMessage(`La recherche a donné ${response.data.total_count} résultats`);
 
 
 }
