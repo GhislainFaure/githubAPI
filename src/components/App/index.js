@@ -1,12 +1,11 @@
 // == Import
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Header from '../Header';
 import Message from '../Message';
 import ReposResults from '../ReposResults';
 import SearchBar from '../SearchBar';
 
-import resultsData from '../../data/repos'
 import './style.scss';
 
 /**
@@ -32,11 +31,22 @@ function App () {
 const [message, setMessage ] = useState("");
 const [results, setResults] = useState([]);
 const [search, setSearch] = useState('');
+const [query, setQuery ] = useState('');
 const [error, setError] = useState('');
+const reset = () => {
+  setError('');
+  setMessage('');
+}
+
+
+
+
+
 
 const loadData = async () => {
+  reset();
   try {
-    const response = await axios.get(`https://api.github.com/search/repositories?q=${search}`);
+    const response = await axios.get(`https://api.github.com/search/repositories?q=${query}`);
     setResults(response.data.items);
     setMessage(`La recherche a donné ${response.data.total_count} résultat(s)`);
     
@@ -44,10 +54,19 @@ const loadData = async () => {
     setError(err.message);
     setResults([]);
   }
- 
+};
+
+useEffect(() => {
+  if(query) {
+    loadData();
+  }
+},[query]);
 
 
-}
+ const changeQuery = () => {
+  setQuery(search)
+ }
+
 
   return (
     <div className="app">
@@ -55,7 +74,7 @@ const loadData = async () => {
           <SearchBar  
            inputValue={search}
            onChangeInputValue={setSearch}
-           onSubmitForm={loadData}
+           onSubmitForm={changeQuery}
           />
           <Message content={message}/>
           {error && <div>Une erreur est survenue : {error}</div>  }
